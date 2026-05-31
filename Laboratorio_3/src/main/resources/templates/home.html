@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>JustDoIt!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Left column -->
+    <aside class="sidebar">
+
+        <!-- Logo area -->
+        <div class="logo">
+            <a th:href="@{/}"><img th:src="@{/images/JustDoIt.png}" alt="JustDoIt Logo" width="200" height="200"></a>
+        </div>
+
+        <!-- Navigation area -->
+        <nav class="navigation">
+            <h3>Tareas</h3>
+            <ul>
+                <li>
+                    <a th:href="@{/user/tasks}">Tareas de usuario actual</a>
+                </li>
+                <li>
+                    <a th:href="@{/user/tasks/report}">Reporte de tareas</a>
+                </li>
+            </ul>
+        </nav>
+
+    </aside>
+
+    <!-- Right column -->
+    <main class="content">
+        <h1>Bienvenido a JustDoIt!</h1>
+        <p>
+            El manejo adecuado de listas de tareas es una herramienta clave para mejorar la productividad personal y profesional.
+            Al organizar las actividades pendientes de forma clara y estructurada, las personas pueden priorizar mejor su trabajo,
+            reducir la carga mental y evitar olvidar compromisos importantes.
+            Una lista de tareas bien definida permite enfocar la atención en una actividad a la vez, lo que contribuye a un uso más eficiente del tiempo y
+            a una mayor sensación de control sobre las responsabilidades diarias.
+        </p>
+
+        <p>
+            Además, las listas de tareas facilitan el seguimiento del progreso y fomentan la motivación,
+            ya que completar actividades genera una percepción tangible de avance. En entornos académicos y laborales,
+            este hábito ayuda a planificar mejor el trabajo, cumplir plazos y adaptarse a cambios de manera ordenada.
+            En conjunto, el uso sistemático de listas de tareas no solo incrementa la productividad,
+            sino que también reduce el estrés y mejora la calidad del trabajo real
+
+    </main>
+
+</div>
+
+</body>
+</html>
