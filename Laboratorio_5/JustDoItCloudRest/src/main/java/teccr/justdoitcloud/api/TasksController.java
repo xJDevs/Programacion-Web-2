@@ -48,9 +48,14 @@ public class TasksController {
         return taskService.addTaskToUser(user, task);
     }
 
+
+        // fix para el lab: actualmente el get solamente devuelve el id de task registrado en la db, sin validar usuario
+        // esto porque al metodo de getmapping, no le estamos pasando como parametro el id del usuario, solo el id de task
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
-        Optional<Task> taskOpt = taskService.getTaskById(id);
+    public ResponseEntity<Task> getTaskById(
+            @PathVariable Long id,
+            @PathVariable Long userId) { // se agrega el parametro de user id
+        Optional<Task> taskOpt = taskService.getTaskById(id,  userId);
         return taskOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
