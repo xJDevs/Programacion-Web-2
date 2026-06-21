@@ -63,11 +63,32 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Optional<Task> getTaskById(Long id) {
-        if (id == null || id < 0) {
+    public Optional<Task> getTaskById(Long taskId, Long userId) { // se agrega param de userid
+
+        // valida que el id del task sea valido antes de continuar
+        if (taskId == null || taskId < 0) {
             return Optional.empty();
         }
-        return taskRepository.findById(id);
+
+        // luego obtenemos el task del repository
+        // reminder: se usa optional porque findById puede devolver algo o vacio
+        Optional<Task> possibleTask = taskRepository.findById(taskId);
+
+        if (possibleTask.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // desempaquetamos la caja que devuelve optional para obtener el id del usuario asociado a ese task
+        Long user = possibleTask.get().getUserId();
+
+        // defensive coding: aunque la db obligue un task a tener usuario asociado, igual lo validamos
+        // para evitar que se rompa la app en caso de algun fallo
+
+        if (user != null && userId.equals(user)) {
+            return possibleTask;
+        }
+
+        return Optional.empty();
     }
 
     public Task updateTaskFields(Long id, Task updatedTask) {
