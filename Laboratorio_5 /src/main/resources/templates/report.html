@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>JustDoIt! - Reporte de tareas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<div class="container">
+
+    <!-- Left column -->
+    <aside class="sidebar">
+        <div class="logo">
+            <a th:href="@{/}"><img th:src="@{/images/JustDoIt.png}" alt="JustDoIt Logo" width="200" height="200"></a>
+        </div>
+
+        <nav class="navigation">
+            <h3>Tareas</h3>
+            <ul>
+                <li><a th:href="@{/user/tasks}">Tareas de usuario actual</a></li>
+                <li><a th:href="@{/user/tasks/report}">Reporte de tareas</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Right column -->
+    <main class="content">
+        <h1>Reporte de tareas del usuario</h1>
+
+        <!-- User info (fragmento creado-->
+        <div th:replace="fragments/user-info :: userInfo(${user})"></div>
+
+        <!-- Tabla con todas las tareas, sin agrupar por estado -->
+        <table class="tasks-group">
+            <thead>
+                <tr>
+                    <th>Tarea</th>
+                    <th>Estado</th>
+                    <th>Fecha Límite</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="task : ${user.tasks}">
+                    <td th:text="${task.description}">Descripción de la tarea</td>
+                    <td th:switch="${task.status.name()}">
+                        <span th:case="'PENDING'">Pendiente</span>
+                        <span th:case="'INPROGRESS'">En progreso</span>
+                        <span th:case="'DONE'">Completada</span>
+                        <span th:case="*" th:text="${task.status}">Estado</span>
+                    </td>
+                    <td>
+                        <span th:if="${task.deadline != null}"
+                              th:text="${#temporals.format(task.deadline, 'dd/MMMM/yyyy')}">01/enero/2026</span>
+                        <span th:if="${task.deadline == null}">No especificada</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </main>
+</div>
+</body>
+</html>
