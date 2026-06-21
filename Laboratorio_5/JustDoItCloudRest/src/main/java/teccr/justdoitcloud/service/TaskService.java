@@ -9,6 +9,10 @@ import teccr.justdoitcloud.repository.UserRepository;
 import teccr.justdoitcloud.service.external.taskgenerator.TaskGenerator;
 import teccr.justdoitcloud.service.internal.taskarchiver.TaskArchiver;
 
+// se importan los exceptions creados para manejar errores de forma mas clara y especifica en el servicio
+import teccr.justdoitcloud.exception.TaskNotFoundException;
+import teccr.justdoitcloud.exception.TaskForbiddenException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -91,18 +95,43 @@ public class TaskService {
         return Optional.empty();
     }
 
-    public Task updateTaskFields(Long id, Task updatedTask) {
-        return taskRepository.findById(id)
-                .map(existingTask -> {
-                    if (updatedTask.getDescription() != null && !updatedTask.getDescription().trim().isEmpty()) {
-                        existingTask.setDescription(updatedTask.getDescription().trim());
-                    }
-                    if (updatedTask.getStatus() != null) {
-                        existingTask.setStatus(updatedTask.getStatus());
-                    }
-                    return taskRepository.save(existingTask);
-                })
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+    public Task updateTaskFields(Long taskId, Long userId, Task updatedTask) {
+
+        // valida que el id del task sea valido antes de continuar
+        if (taskId == null || taskId < 0) {
+            throw new TaskNotFoundException("El task con id: " + taskId + " es invalido");
+        }
+
+        // verificamos que el objeto Optional me devuelva contenido y no vacio
+        Optional<Task> taskValido = taskRepository.findById(taskId);
+        if (taskValido.isEmpty()) {
+            throw new TaskNotFoundException("El task con id: " + taskId + " no existe");
+        }
+
+        // desempaquetamos el objeto Optional
+        Task existingTask = taskValido.get();
+        Long validUser = existingTask.getUserId();
+
+        if (validUser == null) {
+            throw new TaskNotFoundException("El task con id: " + taskId + " no tiene un usuario asociado, por lo que no se puede modificar");
+        }
+
+        // lanzamos una excepcion si la tarea no pertenece al usuario indicado en el path
+        // para evitar que un usuario pueda modificar un task que no es suyo
+        if (!userId.equals(validUser)) {
+            throw new TaskForbiddenException("El task con id: " + taskId + " no pertenece al usuario con ID: " + userId);
+        }
+
+
+        if (updatedTask.getDescription() != null && !updatedTask.getDescription().trim().isEmpty()) {
+            existingTask.setDescription(updatedTask.getDescription().trim());
+        }
+        if (updatedTask.getStatus() != null) {
+            existingTask.setStatus(updatedTask.getStatus());
+        }
+
+        return taskRepository.save(existingTask);
+
     }
 
     public void deleteTaskById(Long id) {
