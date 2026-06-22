@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import teccr.justdoitcloud.data.Task;
 import teccr.justdoitcloud.data.User;
 import teccr.justdoitcloud.service.TaskService;
+import teccr.justdoitcloud.exception.TaskNotFoundException;
+import teccr.justdoitcloud.exception.TaskForbiddenException;
 
 import java.util.Optional;
 
@@ -59,14 +61,37 @@ public class TasksController {
         return taskOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // se agrega userId como parametro para validar que el task pertenezca al usario indicado en el path
     @PatchMapping("/{id}")
-    public Task updateTask(@PathVariable Long id, @RequestBody Task task) {
-        return taskService.updateTaskFields(id, task);
+    // se cambia la firma del metodo a ResponseEntity para poder devolver HTTP status
+    public ResponseEntity<Task> updateTask(@PathVariable Long id,
+                           @PathVariable Long userId,
+                           @RequestBody Task task) {
+
+        try {
+            return ResponseEntity.ok(taskService.updateTaskFields(id, userId, task));
+        } catch (TaskNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (TaskForbiddenException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTask(@PathVariable Long id) {
-        taskService.deleteTaskById(id);
+    // la firma oriignal era void, se agrega ResponsEntity<Void> para poder devolver noContent
+    public ResponseEntity<Void> deleteTask(@PathVariable Long id,
+                           @PathVariable Long userId) {
+
+        try {
+            taskService.deleteTaskById(id, userId);
+            return ResponseEntity.noContent().build();
+        } catch (TaskNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }  catch (TaskForbiddenException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+
     }
 }
