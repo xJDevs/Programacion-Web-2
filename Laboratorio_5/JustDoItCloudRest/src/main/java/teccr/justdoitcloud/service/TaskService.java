@@ -134,16 +134,32 @@ public class TaskService {
 
     }
 
-    public void deleteTaskById(Long id) {
-        Optional<Task> maybeTask = taskRepository.findById(id);
+    public void deleteTaskById(Long taskId, Long userId) {
+
+        if (taskId == null || taskId < 0) {
+            throw new TaskNotFoundException("El task con id: " + taskId + " no existe");
+        }
+        Optional<Task> maybeTask = taskRepository.findById(taskId);
         if (maybeTask.isEmpty()) {
-            throw new RuntimeException("Task not found with id: " + id);
+            throw new TaskNotFoundException("El task con ID: " + taskId + "no existe");
         }
 
         Task task = maybeTask.get();
+        Long taskUserId = task.getUserId();
 
-        Optional<User> maybeUser = userRepository.findById(task.getUserId());
-        maybeUser.ifPresent(user -> {
+        if (userId == null || !userId.equals(taskUserId)) {
+            throw new TaskForbiddenException("El task con id: " + taskId + " no pertenece al usuario con ID: " + userId);
+        }
+
+
+        Optional<User> maybeUser = userRepository.findById(userId);
+
+        // defensive coding: si por alguna razon no se encuentra usuario, la tarea no se borra
+        if (maybeUser.isEmpty()) {
+            throw new TaskNotFoundException("El usuario con id: " + userId + " no existe");
+        }
+
+        maybeUser.ifPresent( user -> {
             try {
                 taskArchiver.archiveTask("tasks-deleted", user, task);
             } catch (Exception ignored) {
@@ -151,7 +167,7 @@ public class TaskService {
             }
         });
 
-        taskRepository.deleteById(id);
+        taskRepository.deleteById(taskId);
     }
 
 }
